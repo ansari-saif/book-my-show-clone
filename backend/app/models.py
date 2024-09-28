@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 from pydantic import EmailStr
-from sqlalchemy import Column
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -29,6 +29,7 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     bookings: List["Booking"] = Relationship(back_populates="user")
+    reviews: List["Review"] = Relationship(back_populates="user")
 
 
 # ------------------ Movie Models ------------------
@@ -47,12 +48,40 @@ class Movie(MovieBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     formats: List["MovieFormat"] = Relationship(back_populates="movie")
     reviews: List["Review"] = Relationship(back_populates="movie")
-    pricing: List["MoviePricing"] = Relationship(back_populates="movie")  # Ensure this relationship exists
+    pricing: List["MoviePricing"] = Relationship(back_populates="movie")
     crew: List["Crew"] = Relationship(back_populates="movie")
     cast: List["Cast"] = Relationship(back_populates="movie")
     images: List["MovieImage"] = Relationship(back_populates="movie")
 
+    # Define relationships explicitly using the correct foreign keys
+    related_movies: List["YouMightAlsoLike"] = Relationship(
+        back_populates="movie",
+        sa_relationship_kwargs={"foreign_keys": "YouMightAlsoLike.movie_id"}
+    )
+    referenced_by_movies: List["YouMightAlsoLike"] = Relationship(
+        back_populates="related_movie",
+        sa_relationship_kwargs={"foreign_keys": "YouMightAlsoLike.related_movie_id"}
+    )
+
+
+# ------------------ You Might Also Like (Alternative Approach) ------------------
+class YouMightAlsoLike(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     
+    # Specify explicit foreign keys
+    movie_id: uuid.UUID = Field(sa_column=Column(ForeignKey("movie.id")))
+    related_movie_id: uuid.UUID = Field(sa_column=Column(ForeignKey("movie.id")))
+    
+    # Define the relationships with explicit back_populates and foreign keys
+    movie: Optional["Movie"] = Relationship(
+        back_populates="related_movies",
+        sa_relationship_kwargs={"foreign_keys": "[YouMightAlsoLike.movie_id]"}
+    )
+    related_movie: Optional["Movie"] = Relationship(
+        back_populates="referenced_by_movies",
+        sa_relationship_kwargs={"foreign_keys": "[YouMightAlsoLike.related_movie_id]"}
+    )
+
 class MovieCreate(MovieBase):
     pass
 
@@ -66,14 +95,6 @@ class MovieUpdate(SQLModel):
     rating: Optional[float] = None
     is_recommended: Optional[bool] = None
     you_might_also_like: Optional[List[uuid.UUID]] = None
-
-
-# ------------------ You Might Also Like (Alternative Approach) ------------------
-class YouMightAlsoLike(SQLModel, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    movie_id: uuid.UUID = Field(foreign_key="movie.id")
-    related_movie_id: uuid.UUID = Field(foreign_key="movie.id")
-    movie: Movie = Relationship(back_populates="related_movies")
 
 
 # ------------------ Movie Format Models ------------------
@@ -260,7 +281,7 @@ class Review(ReviewBase, table=True):
     user_id: uuid.UUID = Field(foreign_key="user.id")
     movie_id: uuid.UUID = Field(foreign_key="movie.id")
     user: User = Relationship(back_populates="reviews")
-    movie: Movie = Relationship(back_populates="reviews")  # Ensure this relationship exists
+    movie: Movie = Relationship(back_populates="reviews")
 
 
 class ReviewCreate(ReviewBase):
@@ -282,11 +303,12 @@ class MoviePricingBase(SQLModel):
 class MoviePricing(MoviePricingBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     movie_id: uuid.UUID = Field(foreign_key="movie.id")
-    movie: Movie = Relationship(back_populates="pricing")  # Ensure this relationship exists
+    movie: Movie = Relationship(back_populates="pricing")
     cinema_id: uuid.UUID = Field(foreign_key="cinema.id")
     cinema: Cinema = Relationship(back_populates="movie_pricing")
     category_id: uuid.UUID = Field(foreign_key="cinemacategory.id")
     format_id: uuid.UUID = Field(foreign_key="movieformat.id")
+
 
 class MoviePricingCreate(MoviePricingBase):
     movie_id: uuid.UUID
@@ -448,16 +470,15 @@ class Token(SQLModel):
 class TokenPayload(SQLModel):
     sub: str | None = None
 
+
 # Generic message
 class Message(SQLModel):
     message: str
 
 
-
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
-
 
 
 # Properties to return via API, id is always required
@@ -466,8 +487,9 @@ class UserPublic(UserBase):
 
 
 class UsersPublic(SQLModel):
-    data: list[UserPublic]
+    data: List[UserPublic]
     count: int
+
 
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
@@ -483,5 +505,4 @@ class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
     full_name: str | None = Field(default=None, max_length=255)
-
 

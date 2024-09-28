@@ -53,7 +53,7 @@ class Movie(MovieBase, table=True):
     cast: List["Cast"] = Relationship(back_populates="movie")
     images: List["MovieImage"] = Relationship(back_populates="movie")
 
-    # Define relationships explicitly using the correct foreign keys
+    # Specify explicit relationships for related movies
     related_movies: List["YouMightAlsoLike"] = Relationship(
         back_populates="movie",
         sa_relationship_kwargs={"foreign_keys": "YouMightAlsoLike.movie_id"}
@@ -72,7 +72,7 @@ class YouMightAlsoLike(SQLModel, table=True):
     movie_id: uuid.UUID = Field(sa_column=Column(ForeignKey("movie.id")))
     related_movie_id: uuid.UUID = Field(sa_column=Column(ForeignKey("movie.id")))
     
-    # Define the relationships with explicit back_populates and foreign keys
+    # Define relationships with explicit foreign keys
     movie: Optional["Movie"] = Relationship(
         back_populates="related_movies",
         sa_relationship_kwargs={"foreign_keys": "[YouMightAlsoLike.movie_id]"}
@@ -81,6 +81,7 @@ class YouMightAlsoLike(SQLModel, table=True):
         back_populates="referenced_by_movies",
         sa_relationship_kwargs={"foreign_keys": "[YouMightAlsoLike.related_movie_id]"}
     )
+
 
 class MovieCreate(MovieBase):
     pass
@@ -211,6 +212,7 @@ class Screen(ScreenBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     cinema_id: uuid.UUID = Field(foreign_key="cinema.id")
     cinema: Cinema = Relationship(back_populates="screens")
+    seats: List["Seat"] = Relationship(back_populates="screen")  # Added relationship
     shows: List["Show"] = Relationship(back_populates="screen")
 
 
@@ -232,7 +234,7 @@ class SeatBase(SQLModel):
 class Seat(SeatBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     screen_id: uuid.UUID = Field(foreign_key="screen.id")
-    screen: Screen = Relationship(back_populates="seats")
+    screen: Screen = Relationship(back_populates="seats")  # Added back_populates
 
 
 class SeatCreate(SeatBase):

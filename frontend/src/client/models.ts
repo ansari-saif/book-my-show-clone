@@ -11,28 +11,6 @@ export type HTTPValidationError = {
   detail?: Array<ValidationError>
 }
 
-export type ItemCreate = {
-  title: string
-  description?: string | null
-}
-
-export type ItemPublic = {
-  title: string
-  description?: string | null
-  id: string
-  owner_id: string
-}
-
-export type ItemUpdate = {
-  title?: string | null
-  description?: string | null
-}
-
-export type ItemsPublic = {
-  data: Array<ItemPublic>
-  count: number
-}
-
 export type Message = {
   message: string
 }
@@ -57,6 +35,7 @@ export type UserCreate = {
   is_active?: boolean
   is_superuser?: boolean
   full_name?: string | null
+  mobile?: string | null
   password: string
 }
 
@@ -65,6 +44,7 @@ export type UserPublic = {
   is_active?: boolean
   is_superuser?: boolean
   full_name?: string | null
+  mobile?: string | null
   id: string
 }
 
@@ -79,6 +59,7 @@ export type UserUpdate = {
   is_active?: boolean
   is_superuser?: boolean
   full_name?: string | null
+  mobile?: string | null
   password?: string | null
 }
 

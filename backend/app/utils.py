@@ -11,6 +11,8 @@ from jwt.exceptions import InvalidTokenError
 
 from app.core import security
 from app.core.config import settings
+import random
+import string
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -121,3 +123,10 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+
+
+def random_lower_string(length: int = 12) -> str:
+    return ''.join(random.choices(string.ascii_lowercase, k=length))
+
+def random_email() -> str:
+    return f"{random_lower_string()}@example.com"

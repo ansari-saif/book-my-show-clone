@@ -47,13 +47,12 @@ class Movie(MovieBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     formats: List["MovieFormat"] = Relationship(back_populates="movie")
     reviews: List["Review"] = Relationship(back_populates="movie")
-    pricing: List["MoviePricing"] = Relationship(back_populates="movie")
+    pricing: List["MoviePricing"] = Relationship(back_populates="movie")  # Ensure this relationship exists
     crew: List["Crew"] = Relationship(back_populates="movie")
     cast: List["Cast"] = Relationship(back_populates="movie")
     images: List["MovieImage"] = Relationship(back_populates="movie")
-    related_movies: List["YouMightAlsoLike"] = Relationship(back_populates="movie")
 
-
+    
 class MovieCreate(MovieBase):
     pass
 
@@ -260,6 +259,8 @@ class Review(ReviewBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="user.id")
     movie_id: uuid.UUID = Field(foreign_key="movie.id")
+    user: User = Relationship(back_populates="reviews")
+    movie: Movie = Relationship(back_populates="reviews")  # Ensure this relationship exists
 
 
 class ReviewCreate(ReviewBase):
@@ -281,10 +282,11 @@ class MoviePricingBase(SQLModel):
 class MoviePricing(MoviePricingBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     movie_id: uuid.UUID = Field(foreign_key="movie.id")
+    movie: Movie = Relationship(back_populates="pricing")  # Ensure this relationship exists
     cinema_id: uuid.UUID = Field(foreign_key="cinema.id")
+    cinema: Cinema = Relationship(back_populates="movie_pricing")
     category_id: uuid.UUID = Field(foreign_key="cinemacategory.id")
     format_id: uuid.UUID = Field(foreign_key="movieformat.id")
-
 
 class MoviePricingCreate(MoviePricingBase):
     movie_id: uuid.UUID
@@ -481,12 +483,5 @@ class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
     full_name: str | None = Field(default=None, max_length=255)
-
-
-# ------------------ Review Models ------------------
-class ReviewBase(SQLModel):
-    rating: int
-    review_text: Optional[str] = None
-    is_top_review: bool = Field(default=False)
 
 

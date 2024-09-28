@@ -52,8 +52,9 @@ class Movie(MovieBase, table=True):
     crew: List["Crew"] = Relationship(back_populates="movie")
     cast: List["Cast"] = Relationship(back_populates="movie")
     images: List["MovieImage"] = Relationship(back_populates="movie")
+    shows: List["Show"] = Relationship(back_populates="movie")  # Added missing relationship
 
-    # Specify explicit relationships for related movies
+    # Define relationships explicitly using the correct foreign keys
     related_movies: List["YouMightAlsoLike"] = Relationship(
         back_populates="movie",
         sa_relationship_kwargs={"foreign_keys": "YouMightAlsoLike.movie_id"}
@@ -64,15 +65,15 @@ class Movie(MovieBase, table=True):
     )
 
 
-# ------------------ You Might Also Like (Alternative Approach) ------------------
+# ------------------ You Might Also Like ------------------
 class YouMightAlsoLike(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    
+
     # Specify explicit foreign keys
     movie_id: uuid.UUID = Field(sa_column=Column(ForeignKey("movie.id")))
     related_movie_id: uuid.UUID = Field(sa_column=Column(ForeignKey("movie.id")))
-    
-    # Define relationships with explicit foreign keys
+
+    # Define relationships with explicit back_populates and foreign keys
     movie: Optional["Movie"] = Relationship(
         back_populates="related_movies",
         sa_relationship_kwargs={"foreign_keys": "[YouMightAlsoLike.movie_id]"}
@@ -108,6 +109,7 @@ class MovieFormat(MovieFormatBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     movie_id: uuid.UUID = Field(foreign_key="movie.id")
     movie: Movie = Relationship(back_populates="formats")
+    movie_pricings: List["MoviePricing"] = Relationship(back_populates="movie_format")  # Added missing relationship
 
 
 class MovieFormatCreate(MovieFormatBase):
@@ -173,6 +175,7 @@ class Cinema(CinemaBase, table=True):
     city_id: uuid.UUID = Field(foreign_key="city.id")
     city: City = Relationship(back_populates="cinemas")
     screens: List["Screen"] = Relationship(back_populates="cinema")
+    movie_pricing: List["MoviePricing"] = Relationship(back_populates="cinema")  # Added missing relationship
 
 
 class CinemaCreate(CinemaBase):
@@ -192,6 +195,7 @@ class CinemaCategoryBase(SQLModel):
 
 class CinemaCategory(CinemaCategoryBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    movie_pricing: List["MoviePricing"] = Relationship(back_populates="category")  # Added missing relationship
 
 
 class CinemaCategoryCreate(CinemaCategoryBase):
@@ -212,8 +216,8 @@ class Screen(ScreenBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     cinema_id: uuid.UUID = Field(foreign_key="cinema.id")
     cinema: Cinema = Relationship(back_populates="screens")
-    seats: List["Seat"] = Relationship(back_populates="screen")  # Added relationship
-    shows: List["Show"] = Relationship(back_populates="screen")
+    seats: List["Seat"] = Relationship(back_populates="screen")  # Added missing relationship
+    shows: List["Show"] = Relationship(back_populates="screen")  # Added missing relationship
 
 
 class ScreenCreate(ScreenBase):
@@ -234,7 +238,8 @@ class SeatBase(SQLModel):
 class Seat(SeatBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     screen_id: uuid.UUID = Field(foreign_key="screen.id")
-    screen: Screen = Relationship(back_populates="seats")  # Added back_populates
+    screen: Screen = Relationship(back_populates="seats")
+    bookingdetails: List["BookingDetail"] = Relationship(back_populates="seat")  # Added missing relationship
 
 
 class SeatCreate(SeatBase):
@@ -256,6 +261,7 @@ class Show(ShowBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     movie_id: uuid.UUID = Field(foreign_key="movie.id")
     screen_id: uuid.UUID = Field(foreign_key="screen.id")
+    movie: Movie = Relationship(back_populates="shows")  # Added missing relationship
     screen: Screen = Relationship(back_populates="shows")
     bookings: List["Booking"] = Relationship(back_populates="show")
 
@@ -309,7 +315,9 @@ class MoviePricing(MoviePricingBase, table=True):
     cinema_id: uuid.UUID = Field(foreign_key="cinema.id")
     cinema: Cinema = Relationship(back_populates="movie_pricing")
     category_id: uuid.UUID = Field(foreign_key="cinemacategory.id")
+    category: CinemaCategory = Relationship(back_populates="movie_pricing")  # Added missing relationship
     format_id: uuid.UUID = Field(foreign_key="movieformat.id")
+    movie_format: MovieFormat = Relationship(back_populates="movie_pricings")  # Added missing relationship
 
 
 class MoviePricingCreate(MoviePricingBase):
@@ -406,7 +414,7 @@ class BookingDetail(BookingDetailBase, table=True):
     booking_id: uuid.UUID = Field(foreign_key="booking.id")
     seat_id: uuid.UUID = Field(foreign_key="seat.id")
     booking: Booking = Relationship(back_populates="details")
-    seat: Seat = Relationship(back_populates="bookingdetails")
+    seat: Seat = Relationship(back_populates="bookingdetails")  # Corrected back_populates
 
 
 class BookingDetailCreate(BookingDetailBase):
@@ -507,4 +515,3 @@ class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
     full_name: str | None = Field(default=None, max_length=255)
-

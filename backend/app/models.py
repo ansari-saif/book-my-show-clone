@@ -481,3 +481,12 @@ class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
     full_name: str | None = Field(default=None, max_length=255)
+
+
+# ------------------ Review Models ------------------
+class ReviewBase(SQLModel):
+    rating: int
+    review_text: Optional[str] = None
+    is_top_review: bool = Field(default=False)
+
+

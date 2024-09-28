@@ -2,6 +2,8 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 from pydantic import EmailStr
+from sqlalchemy import Column
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -38,7 +40,7 @@ class MovieBase(SQLModel):
     release_date: Optional[datetime] = None
     rating: Optional[float] = None
     is_recommended: bool = Field(default=False)
-    you_might_also_like: List[uuid.UUID] = []
+    you_might_also_like: List[uuid.UUID] = Field(sa_column=Column(ARRAY(UUID)))
 
 
 class Movie(MovieBase, table=True):
@@ -49,6 +51,7 @@ class Movie(MovieBase, table=True):
     crew: List["Crew"] = Relationship(back_populates="movie")
     cast: List["Cast"] = Relationship(back_populates="movie")
     images: List["MovieImage"] = Relationship(back_populates="movie")
+    related_movies: List["YouMightAlsoLike"] = Relationship(back_populates="movie")
 
 
 class MovieCreate(MovieBase):
@@ -64,6 +67,14 @@ class MovieUpdate(SQLModel):
     rating: Optional[float] = None
     is_recommended: Optional[bool] = None
     you_might_also_like: Optional[List[uuid.UUID]] = None
+
+
+# ------------------ You Might Also Like (Alternative Approach) ------------------
+class YouMightAlsoLike(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    movie_id: uuid.UUID = Field(foreign_key="movie.id")
+    related_movie_id: uuid.UUID = Field(foreign_key="movie.id")
+    movie: Movie = Relationship(back_populates="related_movies")
 
 
 # ------------------ Movie Format Models ------------------
@@ -409,7 +420,7 @@ class PaymentUpdate(SQLModel):
 # ------------------ HomePageData Models ------------------
 class HomePageDataBase(SQLModel):
     section_name: str = Field(max_length=100)  # e.g. Top Movies, Trending, Recommended
-    movie_ids: List[uuid.UUID] = []  # List of movie IDs to display in the section
+    movie_ids: List[uuid.UUID] = Field(sa_column=Column(ARRAY(UUID)))  # List of movie IDs to display in the section
 
 
 class HomePageData(HomePageDataBase, table=True):
@@ -425,3 +436,48 @@ class HomePageDataUpdate(SQLModel):
     movie_ids: Optional[List[uuid.UUID]] = None
 
 
+# JSON payload containing access token
+class Token(SQLModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+# Contents of JWT token
+class TokenPayload(SQLModel):
+    sub: str | None = None
+
+# Generic message
+class Message(SQLModel):
+    message: str
+
+
+
+class NewPassword(SQLModel):
+    token: str
+    new_password: str = Field(min_length=8, max_length=40)
+
+
+
+# Properties to return via API, id is always required
+class UserPublic(UserBase):
+    id: uuid.UUID
+
+
+class UsersPublic(SQLModel):
+    data: list[UserPublic]
+    count: int
+
+class UserUpdateMe(SQLModel):
+    full_name: str | None = Field(default=None, max_length=255)
+    email: EmailStr | None = Field(default=None, max_length=255)
+
+
+class UpdatePassword(SQLModel):
+    current_password: str = Field(min_length=8, max_length=40)
+    new_password: str = Field(min_length=8, max_length=40)
+
+
+class UserRegister(SQLModel):
+    email: EmailStr = Field(max_length=255)
+    password: str = Field(min_length=8, max_length=40)
+    full_name: str | None = Field(default=None, max_length=255)

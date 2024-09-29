@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 from pydantic import EmailStr
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -32,6 +32,15 @@ class User(UserBase, table=True):
     reviews: List["Review"] = Relationship(back_populates="user")
 
 
+class UserPublic(UserBase):
+    id: uuid.UUID
+
+
+class UsersPublic(SQLModel):
+    data: List[UserPublic]
+    count: int
+
+
 # ------------------ Movie Models ------------------
 class MovieBase(SQLModel):
     title: str
@@ -41,46 +50,8 @@ class MovieBase(SQLModel):
     release_date: Optional[datetime] = None
     rating: Optional[float] = None
     is_recommended: bool = Field(default=False)
-    you_might_also_like: List[uuid.UUID] = Field(sa_column=Column(ARRAY(UUID)))
-
-
-class Movie(MovieBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    formats: List["MovieFormat"] = Relationship(back_populates="movie")
-    reviews: List["Review"] = Relationship(back_populates="movie")
-    pricing: List["MoviePricing"] = Relationship(back_populates="movie")
-    crew: List["Crew"] = Relationship(back_populates="movie")
-    cast: List["Cast"] = Relationship(back_populates="movie")
-    images: List["MovieImage"] = Relationship(back_populates="movie")
-    shows: List["Show"] = Relationship(back_populates="movie")  # Added missing relationship
-
-    # Define relationships explicitly using the correct foreign keys
-    related_movies: List["YouMightAlsoLike"] = Relationship(
-        back_populates="movie",
-        sa_relationship_kwargs={"foreign_keys": "YouMightAlsoLike.movie_id"}
-    )
-    referenced_by_movies: List["YouMightAlsoLike"] = Relationship(
-        back_populates="related_movie",
-        sa_relationship_kwargs={"foreign_keys": "YouMightAlsoLike.related_movie_id"}
-    )
-
-
-# ------------------ You Might Also Like ------------------
-class YouMightAlsoLike(SQLModel, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-
-    # Specify explicit foreign keys
-    movie_id: uuid.UUID = Field(sa_column=Column(ForeignKey("movie.id")))
-    related_movie_id: uuid.UUID = Field(sa_column=Column(ForeignKey("movie.id")))
-
-    # Define relationships with explicit back_populates and foreign keys
-    movie: Optional["Movie"] = Relationship(
-        back_populates="related_movies",
-        sa_relationship_kwargs={"foreign_keys": "[YouMightAlsoLike.movie_id]"}
-    )
-    related_movie: Optional["Movie"] = Relationship(
-        back_populates="referenced_by_movies",
-        sa_relationship_kwargs={"foreign_keys": "[YouMightAlsoLike.related_movie_id]"}
+    you_might_also_like: Optional[List[uuid.UUID]] = Field(
+        default=None, sa_column=Column(ARRAY(UUID), nullable=True)
     )
 
 
@@ -99,17 +70,30 @@ class MovieUpdate(SQLModel):
     you_might_also_like: Optional[List[uuid.UUID]] = None
 
 
+class Movie(MovieBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    formats: List["MovieFormat"] = Relationship(back_populates="movie")
+    reviews: List["Review"] = Relationship(back_populates="movie")
+    pricing: List["MoviePricing"] = Relationship(back_populates="movie")
+    crew: List["Crew"] = Relationship(back_populates="movie")
+    cast: List["Cast"] = Relationship(back_populates="movie")
+    images: List["MovieImage"] = Relationship(back_populates="movie")
+    shows: List["Show"] = Relationship(back_populates="movie")
+
+
+class MoviePublic(MovieBase):
+    id: uuid.UUID
+
+
+class MoviesPublic(SQLModel):
+    data: List[MoviePublic]
+    count: int
+
+
 # ------------------ Movie Format Models ------------------
 class MovieFormatBase(SQLModel):
     format: str  # 2D, 3D, 4DX, etc.
     language: str  # English, Hindi, etc.
-
-
-class MovieFormat(MovieFormatBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    movie_id: uuid.UUID = Field(foreign_key="movie.id")
-    movie: Movie = Relationship(back_populates="formats")
-    movie_pricings: List["MoviePricing"] = Relationship(back_populates="movie_format")  # Added missing relationship
 
 
 class MovieFormatCreate(MovieFormatBase):
@@ -121,16 +105,27 @@ class MovieFormatUpdate(SQLModel):
     language: Optional[str] = None
 
 
+class MovieFormat(MovieFormatBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    movie_id: uuid.UUID = Field(foreign_key="movie.id")
+    movie: "Movie" = Relationship(back_populates="formats")
+    movie_pricings: List["MoviePricing"] = Relationship(back_populates="movie_format")
+
+
+class MovieFormatPublic(MovieFormatBase):
+    id: uuid.UUID
+    movie_id: uuid.UUID
+
+
+class MovieFormatsPublic(SQLModel):
+    data: List[MovieFormatPublic]
+    count: int
+
+
 # ------------------ Movie Image Models ------------------
 class MovieImageBase(SQLModel):
     image_url: str = Field(max_length=500)
     image_type: str = Field(max_length=50)  # poster, banner, thumbnail, etc.
-
-
-class MovieImage(MovieImageBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    movie_id: uuid.UUID = Field(foreign_key="movie.id")
-    movie: Movie = Relationship(back_populates="images")
 
 
 class MovieImageCreate(MovieImageBase):
@@ -142,16 +137,55 @@ class MovieImageUpdate(SQLModel):
     image_type: Optional[str] = None
 
 
-# ------------------ Cinema Models ------------------
+class MovieImage(MovieImageBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    movie_id: uuid.UUID = Field(foreign_key="movie.id")
+    movie: "Movie" = Relationship(back_populates="images")
+
+
+class MovieImagePublic(MovieImageBase):
+    id: uuid.UUID
+    movie_id: uuid.UUID
+
+
+class MovieImagesPublic(SQLModel):
+    data: List[MovieImagePublic]
+    count: int
+
+
+# ------------------ HomePageData Models ------------------
+class HomePageDataBase(SQLModel):
+    section_name: str = Field(max_length=100)  # e.g. Top Movies, Trending, Recommended
+    movie_ids: List[uuid.UUID] = Field(sa_column=Column(ARRAY(UUID)))  # List of movie IDs
+
+
+class HomePageDataCreate(HomePageDataBase):
+    pass
+
+
+class HomePageDataUpdate(SQLModel):
+    section_name: Optional[str] = None
+    movie_ids: Optional[List[uuid.UUID]] = None
+
+
+class HomePageData(HomePageDataBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+
+class HomePageDataPublic(HomePageDataBase):
+    id: uuid.UUID
+
+
+class HomePageDatasPublic(SQLModel):
+    data: List[HomePageDataPublic]
+    count: int
+
+
+# ------------------ City Models ------------------
 class CityBase(SQLModel):
     city_name: str = Field(max_length=100)
     state: Optional[str] = Field(max_length=100)
     country: Optional[str] = Field(max_length=100)
-
-
-class City(CityBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    cinemas: List["Cinema"] = Relationship(back_populates="city")
 
 
 class CityCreate(CityBase):
@@ -164,22 +198,29 @@ class CityUpdate(SQLModel):
     country: Optional[str] = None
 
 
+class City(CityBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    cinemas: List["Cinema"] = Relationship(back_populates="city")
+
+
+class CityPublic(CityBase):
+    id: uuid.UUID
+
+
+class CitiesPublic(SQLModel):
+    data: List[CityPublic]
+    count: int
+
+
+# ------------------ Cinema Models ------------------
 class CinemaBase(SQLModel):
     name: str
     address: str
     phone_number: Optional[str] = None
 
 
-class Cinema(CinemaBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    city_id: uuid.UUID = Field(foreign_key="city.id")
-    city: City = Relationship(back_populates="cinemas")
-    screens: List["Screen"] = Relationship(back_populates="cinema")
-    movie_pricing: List["MoviePricing"] = Relationship(back_populates="cinema")  # Added missing relationship
-
-
 class CinemaCreate(CinemaBase):
-    pass
+    city_id: uuid.UUID  # city_id is now a required field
 
 
 class CinemaUpdate(SQLModel):
@@ -188,14 +229,27 @@ class CinemaUpdate(SQLModel):
     phone_number: Optional[str] = None
 
 
+class Cinema(CinemaBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    city_id: uuid.UUID = Field(foreign_key="city.id")
+    city: "City" = Relationship(back_populates="cinemas")
+    screens: List["Screen"] = Relationship(back_populates="cinema")
+    movie_pricing: List["MoviePricing"] = Relationship(back_populates="cinema")
+
+
+class CinemaPublic(CinemaBase):
+    id: uuid.UUID
+    city_id: uuid.UUID
+
+
+class CinemasPublic(SQLModel):
+    data: List[CinemaPublic]
+    count: int
+
+
 # ------------------ Cinema Category Models ------------------
 class CinemaCategoryBase(SQLModel):
     category_name: str = Field(max_length=100)  # VIP, Regular, IMAX, etc.
-
-
-class CinemaCategory(CinemaCategoryBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    movie_pricing: List["MoviePricing"] = Relationship(back_populates="category")  # Added missing relationship
 
 
 class CinemaCategoryCreate(CinemaCategoryBase):
@@ -206,18 +260,24 @@ class CinemaCategoryUpdate(SQLModel):
     category_name: Optional[str] = None
 
 
-# ------------------ Screen and Seat Models ------------------
+class CinemaCategory(CinemaCategoryBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    movie_pricing: List["MoviePricing"] = Relationship(back_populates="category")
+
+
+class CinemaCategoryPublic(CinemaCategoryBase):
+    id: uuid.UUID
+
+
+class CinemaCategoriesPublic(SQLModel):
+    data: List[CinemaCategoryPublic]
+    count: int
+
+
+# ------------------ Screen Models ------------------
 class ScreenBase(SQLModel):
     screen_name: str
     capacity: int
-
-
-class Screen(ScreenBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    cinema_id: uuid.UUID = Field(foreign_key="cinema.id")
-    cinema: Cinema = Relationship(back_populates="screens")
-    seats: List["Seat"] = Relationship(back_populates="screen")  # Added missing relationship
-    shows: List["Show"] = Relationship(back_populates="screen")  # Added missing relationship
 
 
 class ScreenCreate(ScreenBase):
@@ -229,17 +289,29 @@ class ScreenUpdate(SQLModel):
     capacity: Optional[int] = None
 
 
+class Screen(ScreenBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    cinema_id: uuid.UUID = Field(foreign_key="cinema.id")
+    cinema: "Cinema" = Relationship(back_populates="screens")
+    seats: List["Seat"] = Relationship(back_populates="screen")
+    shows: List["Show"] = Relationship(back_populates="screen")
+
+
+class ScreenPublic(ScreenBase):
+    id: uuid.UUID
+    cinema_id: uuid.UUID
+
+
+class ScreensPublic(SQLModel):
+    data: List[ScreenPublic]
+    count: int
+
+
+# ------------------ Seat Models ------------------
 class SeatBase(SQLModel):
     seat_number: str
     seat_type: str  # Regular, VIP, etc.
     is_available: bool = Field(default=True)
-
-
-class Seat(SeatBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    screen_id: uuid.UUID = Field(foreign_key="screen.id")
-    screen: Screen = Relationship(back_populates="seats")
-    bookingdetails: List["BookingDetail"] = Relationship(back_populates="seat")  # Added missing relationship
 
 
 class SeatCreate(SeatBase):
@@ -252,18 +324,26 @@ class SeatUpdate(SQLModel):
     is_available: Optional[bool] = None
 
 
+class Seat(SeatBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    screen_id: uuid.UUID = Field(foreign_key="screen.id")
+    screen: "Screen" = Relationship(back_populates="seats")
+    bookingdetails: List["BookingDetail"] = Relationship(back_populates="seat")
+
+
+class SeatPublic(SeatBase):
+    id: uuid.UUID
+    screen_id: uuid.UUID
+
+
+class SeatsPublic(SQLModel):
+    data: List[SeatPublic]
+    count: int
+
+
 # ------------------ Show Models ------------------
 class ShowBase(SQLModel):
     show_time: datetime
-
-
-class Show(ShowBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    movie_id: uuid.UUID = Field(foreign_key="movie.id")
-    screen_id: uuid.UUID = Field(foreign_key="screen.id")
-    movie: Movie = Relationship(back_populates="shows")  # Added missing relationship
-    screen: Screen = Relationship(back_populates="shows")
-    bookings: List["Booking"] = Relationship(back_populates="show")
 
 
 class ShowCreate(ShowBase):
@@ -277,19 +357,31 @@ class ShowUpdate(SQLModel):
     screen_id: Optional[uuid.UUID] = None
 
 
+class Show(ShowBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    movie_id: uuid.UUID = Field(foreign_key="movie.id")
+    screen_id: uuid.UUID = Field(foreign_key="screen.id")
+    movie: "Movie" = Relationship(back_populates="shows")
+    screen: "Screen" = Relationship(back_populates="shows")
+    bookings: List["Booking"] = Relationship(back_populates="show")
+
+
+class ShowPublic(ShowBase):
+    id: uuid.UUID
+    movie_id: uuid.UUID
+    screen_id: uuid.UUID
+
+
+class ShowsPublic(SQLModel):
+    data: List[ShowPublic]
+    count: int
+
+
 # ------------------ Review Models ------------------
 class ReviewBase(SQLModel):
     rating: int
     review_text: Optional[str] = None
     is_top_review: bool = Field(default=False)
-
-
-class Review(ReviewBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="user.id")
-    movie_id: uuid.UUID = Field(foreign_key="movie.id")
-    user: User = Relationship(back_populates="reviews")
-    movie: Movie = Relationship(back_populates="reviews")
 
 
 class ReviewCreate(ReviewBase):
@@ -303,93 +395,30 @@ class ReviewUpdate(SQLModel):
     is_top_review: Optional[bool] = None
 
 
-# ------------------ Movie Pricing Models ------------------
-class MoviePricingBase(SQLModel):
-    price: float
-
-
-class MoviePricing(MoviePricingBase, table=True):
+class Review(ReviewBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id")
     movie_id: uuid.UUID = Field(foreign_key="movie.id")
-    movie: Movie = Relationship(back_populates="pricing")
-    cinema_id: uuid.UUID = Field(foreign_key="cinema.id")
-    cinema: Cinema = Relationship(back_populates="movie_pricing")
-    category_id: uuid.UUID = Field(foreign_key="cinemacategory.id")
-    category: CinemaCategory = Relationship(back_populates="movie_pricing")  # Added missing relationship
-    format_id: uuid.UUID = Field(foreign_key="movieformat.id")
-    movie_format: MovieFormat = Relationship(back_populates="movie_pricings")  # Added missing relationship
+    user: "User" = Relationship(back_populates="reviews")
+    movie: "Movie" = Relationship(back_populates="reviews")
 
 
-class MoviePricingCreate(MoviePricingBase):
-    movie_id: uuid.UUID
-    cinema_id: uuid.UUID
-    category_id: uuid.UUID
-    format_id: uuid.UUID
-
-
-class MoviePricingUpdate(SQLModel):
-    price: Optional[float] = None
-    movie_id: Optional[uuid.UUID] = None
-    cinema_id: Optional[uuid.UUID] = None
-    category_id: Optional[uuid.UUID] = None
-    format_id: Optional[uuid.UUID] = None
-
-
-# ------------------ Crew and Cast Models ------------------
-class CrewBase(SQLModel):
-    name: str
-    role: str  # Director, Producer, etc.
-
-
-class Crew(CrewBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    movie_id: uuid.UUID = Field(foreign_key="movie.id")
-    movie: Movie = Relationship(back_populates="crew")
-
-
-class CrewCreate(CrewBase):
+class ReviewPublic(ReviewBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
     movie_id: uuid.UUID
 
 
-class CrewUpdate(SQLModel):
-    name: Optional[str] = None
-    role: Optional[str] = None
-
-
-class CastBase(SQLModel):
-    name: str
-    role_in_movie: str  # Character name
-
-
-class Cast(CastBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    movie_id: uuid.UUID = Field(foreign_key="movie.id")
-    movie: Movie = Relationship(back_populates="cast")
-
-
-class CastCreate(CastBase):
+class ReviewsPublic(SQLModel):
+    data: List[ReviewPublic]
+    count: int
     movie_id: uuid.UUID
-
-
-class CastUpdate(SQLModel):
-    name: Optional[str] = None
-    role_in_movie: Optional[str] = None
 
 
 # ------------------ Booking Models ------------------
 class BookingBase(SQLModel):
     booking_time: datetime
     total_amount: float
-
-
-class Booking(BookingBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="user.id")
-    show_id: uuid.UUID = Field(foreign_key="show.id")
-    user: User = Relationship(back_populates="bookings")
-    show: Show = Relationship(back_populates="bookings")
-    details: List["BookingDetail"] = Relationship(back_populates="booking")
-    payments: List["Payment"] = Relationship(back_populates="booking")
 
 
 class BookingCreate(BookingBase):
@@ -404,17 +433,30 @@ class BookingUpdate(SQLModel):
     show_id: Optional[uuid.UUID] = None
 
 
+class Booking(BookingBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id")
+    show_id: uuid.UUID = Field(foreign_key="show.id")
+    user: "User" = Relationship(back_populates="bookings")
+    show: "Show" = Relationship(back_populates="bookings")
+    details: List["BookingDetail"] = Relationship(back_populates="booking")
+    payments: List["Payment"] = Relationship(back_populates="booking")
+
+
+class BookingPublic(BookingBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    show_id: uuid.UUID
+
+
+class BookingsPublic(SQLModel):
+    data: List[BookingPublic]
+    count: int
+
+
 # ------------------ Booking Detail Models ------------------
 class BookingDetailBase(SQLModel):
     price: float
-
-
-class BookingDetail(BookingDetailBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    booking_id: uuid.UUID = Field(foreign_key="booking.id")
-    seat_id: uuid.UUID = Field(foreign_key="seat.id")
-    booking: Booking = Relationship(back_populates="details")
-    seat: Seat = Relationship(back_populates="bookingdetails")  # Corrected back_populates
 
 
 class BookingDetailCreate(BookingDetailBase):
@@ -428,17 +470,30 @@ class BookingDetailUpdate(SQLModel):
     seat_id: Optional[uuid.UUID] = None
 
 
+class BookingDetail(BookingDetailBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    booking_id: uuid.UUID = Field(foreign_key="booking.id")
+    seat_id: uuid.UUID = Field(foreign_key="seat.id")
+    booking: "Booking" = Relationship(back_populates="details")
+    seat: "Seat" = Relationship(back_populates="bookingdetails")
+
+
+class BookingDetailPublic(BookingDetailBase):
+    id: uuid.UUID
+    booking_id: uuid.UUID
+    seat_id: uuid.UUID
+
+
+class BookingDetailsPublic(SQLModel):
+    data: List[BookingDetailPublic]
+    count: int
+
+
 # ------------------ Payment Models ------------------
 class PaymentBase(SQLModel):
     payment_method: str
     payment_status: str
     amount_paid: float
-
-
-class Payment(PaymentBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    booking_id: uuid.UUID = Field(foreign_key="booking.id")
-    booking: Booking = Relationship(back_populates="payments")
 
 
 class PaymentCreate(PaymentBase):
@@ -451,23 +506,126 @@ class PaymentUpdate(SQLModel):
     amount_paid: Optional[float] = None
 
 
-# ------------------ HomePageData Models ------------------
-class HomePageDataBase(SQLModel):
-    section_name: str = Field(max_length=100)  # e.g. Top Movies, Trending, Recommended
-    movie_ids: List[uuid.UUID] = Field(sa_column=Column(ARRAY(UUID)))  # List of movie IDs to display in the section
-
-
-class HomePageData(HomePageDataBase, table=True):
+class Payment(PaymentBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    booking_id: uuid.UUID = Field(foreign_key="booking.id")
+    booking: "Booking" = Relationship(back_populates="payments")
 
 
-class HomePageDataCreate(HomePageDataBase):
-    pass
+class PaymentPublic(PaymentBase):
+    id: uuid.UUID
+    booking_id: uuid.UUID
 
 
-class HomePageDataUpdate(SQLModel):
-    section_name: Optional[str] = None
-    movie_ids: Optional[List[uuid.UUID]] = None
+class PaymentsPublic(SQLModel):
+    data: List[PaymentPublic]
+    count: int
+
+
+# ------------------ Movie Pricing Models ------------------
+class MoviePricingBase(SQLModel):
+    price: float
+
+
+class MoviePricingCreate(MoviePricingBase):
+    movie_id: uuid.UUID
+    cinema_id: uuid.UUID
+    format_id: uuid.UUID
+
+
+class MoviePricingUpdate(SQLModel):
+    price: Optional[float] = None
+    movie_id: Optional[uuid.UUID] = None
+    cinema_id: Optional[uuid.UUID] = None
+    category_id: Optional[uuid.UUID] = None
+    format_id: Optional[uuid.UUID] = None
+
+
+class MoviePricing(MoviePricingBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    movie_id: uuid.UUID = Field(foreign_key="movie.id")
+    movie: "Movie" = Relationship(back_populates="pricing")
+    cinema_id: uuid.UUID = Field(foreign_key="cinema.id")
+    cinema: "Cinema" = Relationship(back_populates="movie_pricing")
+    category_id: Optional[uuid.UUID] = Field(default=None,foreign_key="cinemacategory.id", nullable=True)
+    category: "CinemaCategory" = Relationship(back_populates="movie_pricing")
+    format_id: uuid.UUID = Field(foreign_key="movieformat.id")
+    movie_format: "MovieFormat" = Relationship(back_populates="movie_pricings")
+
+
+class MoviePricingPublic(MoviePricingBase):
+    id: uuid.UUID
+    movie_id: uuid.UUID
+    cinema_id: uuid.UUID
+    category_id: uuid.UUID
+    format_id: uuid.UUID
+
+
+class MoviePricingsPublic(SQLModel):
+    data: List[MoviePricingPublic]
+    count: int
+
+
+# ------------------ Crew Models ------------------
+class CrewBase(SQLModel):
+    name: str
+    role: str  # Director, Producer, etc.
+
+
+class CrewCreate(CrewBase):
+    movie_id: uuid.UUID
+
+
+class CrewUpdate(SQLModel):
+    name: Optional[str] = None
+    role: Optional[str] = None
+
+
+class Crew(CrewBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    movie_id: uuid.UUID = Field(foreign_key="movie.id")
+    movie: "Movie" = Relationship(back_populates="crew")
+
+
+class CrewPublic(CrewBase):
+    id: uuid.UUID
+    movie_id: uuid.UUID
+
+
+class CrewsPublic(SQLModel):
+    data: List[CrewPublic]
+    count: int
+
+
+# ------------------ Cast Models ------------------
+class CastBase(SQLModel):
+    name: str
+    role_in_movie: str  # Character name
+
+
+class CastCreate(CastBase):
+    movie_id: uuid.UUID
+
+
+class CastUpdate(SQLModel):
+    name: Optional[str] = None
+    role_in_movie: Optional[str] = None
+
+
+class Cast(CastBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    movie_id: uuid.UUID = Field(foreign_key="movie.id")
+    movie: "Movie" = Relationship(back_populates="cast")
+
+
+class CastPublic(CastBase):
+    id: uuid.UUID
+    movie_id: uuid.UUID
+
+
+class CastsPublic(SQLModel):
+    data: List[CastPublic]
+    count: int
 
 
 # JSON payload containing access token
@@ -495,10 +653,6 @@ class NewPassword(SQLModel):
 class UserPublic(UserBase):
     id: uuid.UUID
 
-
-class UsersPublic(SQLModel):
-    data: List[UserPublic]
-    count: int
 
 
 class UserUpdateMe(SQLModel):

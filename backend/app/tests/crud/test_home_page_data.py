@@ -14,7 +14,7 @@ def test_update_home_page_data(db: Session) -> None:
     home_page_data = create_random_home_page_data(db)
     new_section_name = "Recommended Movies"
     home_page_data_update = HomePageDataUpdate(section_name=new_section_name)
-    updated_data = crud.update_home_page_data(session=db, db_data=home_page_data, data_in=home_page_data_update)
+    updated_data = crud.update_home_page_data(session=db, db_home_page_data=home_page_data, home_page_data_in=home_page_data_update)
     assert updated_data.section_name == new_section_name
 
 

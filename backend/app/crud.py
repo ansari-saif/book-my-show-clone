@@ -492,3 +492,20 @@ def update_seat(*, session: Session, db_seat: Seat, seat_in: SeatUpdate) -> Seat
     session.commit()
     session.refresh(db_seat)
     return db_seat
+
+
+# ------------------ Movie Pricing CRUD ------------------
+
+def get_movie_pricing_by_id(*, session: Session, pricing_id: uuid.UUID) -> Optional[MoviePricing]:
+    """
+    Retrieves a movie pricing record by its ID.
+
+    Args:
+        session (Session): SQLAlchemy session used for database interaction.
+        pricing_id (UUID): The ID of the MoviePricing record to retrieve.
+
+    Returns:
+        Optional[MoviePricing]: The MoviePricing record if found, or None.
+    """
+    statement = select(MoviePricing).where(MoviePricing.id == pricing_id)
+    return session.exec(statement).first()

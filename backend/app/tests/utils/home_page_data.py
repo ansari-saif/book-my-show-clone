@@ -12,5 +12,5 @@ def create_random_home_page_data(db: Session) -> HomePageData:
         section_name=section_name,
         movie_ids=[movie.id]
     )
-    home_page_data = crud.create_home_page_data(session=db, data_create=home_page_data_in)
+    home_page_data = crud.create_home_page_data(session=db, home_page_data_create=home_page_data_in)
     return home_page_data

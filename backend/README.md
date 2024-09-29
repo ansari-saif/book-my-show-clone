@@ -173,3 +173,8 @@ Once you have the MJML extension installed, you can create a new email template 
 
 
 fastapi dev app/main.py
+docker compose exec backend bash scripts/tests-start.sh
+coverage run --source=app -m pytest app/tests/api/routes/test_movies.py::test_create_movie
+
+alembic revision --autogenerate -m "Add column last_name to User model"
+alembic upgrade head

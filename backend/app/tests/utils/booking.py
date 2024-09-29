@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlmodel import Session
 from app import crud
 from app.models import Booking, BookingCreate
@@ -10,7 +11,8 @@ def create_random_booking(db: Session) -> Booking:
     booking_in = BookingCreate(
         user_id=user.id,
         show_id=show.id,
-        total_amount=500.00  # Example total amount
+        total_amount=500.00,
+        booking_time=datetime.now()
     )
     booking = crud.create_booking(session=db, booking_create=booking_in)
     return booking

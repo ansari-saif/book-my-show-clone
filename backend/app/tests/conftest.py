@@ -1,6 +1,7 @@
 from collections.abc import Generator
 
 import pytest
+import json
 from fastapi.testclient import TestClient
 from sqlmodel import Session, delete
 
@@ -17,9 +18,9 @@ def db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         init_db(session)
         yield session
-        statement = delete(User)
-        session.execute(statement)
-        session.commit()
+        # statement = delete(User)
+        # session.execute(statement)
+        # session.commit()
 
 
 @pytest.fixture(scope="module")

@@ -13,7 +13,6 @@ def create_random_movie_pricing(db: Session) -> MoviePricing:
     pricing_in = MoviePricingCreate(
         movie_id=movie.id,
         cinema_id=cinema.id,
-        category_id=None,  # Assuming we don't have categories yet
         format_id=movie_format.id,
         price=200.00  # Example price
     )

@@ -15,7 +15,7 @@ def test_update_movie_image(db: Session) -> None:
     movie_image = create_random_movie_image(db)
     new_image_url = random_lower_string() + ".jpg"
     movie_image_update = MovieImageUpdate(image_url=new_image_url)
-    updated_image = crud.update_movie_image(session=db, db_image=movie_image, image_in=movie_image_update)
+    updated_image = crud.update_movie_image(session=db, db_movie_image=movie_image, movie_image_in=movie_image_update)
     assert updated_image.image_url == new_image_url
 
 

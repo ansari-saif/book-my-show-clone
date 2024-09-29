@@ -12,6 +12,6 @@ def create_random_booking_detail(db: Session) -> BookingDetail:
         seat_id=seat.id,
         price=100.00  # Example price
     )
-    booking_detail = crud.create_booking_detail(session=db, detail_create=booking_detail_in)
+    booking_detail = crud.create_booking_detail(session=db, booking_detail_create=booking_detail_in)
     return booking_detail
 

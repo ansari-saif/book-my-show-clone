@@ -14,5 +14,5 @@ def create_random_movie_image(db: Session) -> MovieImage:
         image_url=image_url,
         image_type=image_type
     )
-    movie_image = crud.create_movie_image(session=db, image_create=movie_image_in)
+    movie_image = crud.create_movie_image(session=db, movie_image_create=movie_image_in)
     return movie_image

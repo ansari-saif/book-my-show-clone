@@ -13,7 +13,7 @@ def test_update_booking_detail(db: Session) -> None:
     booking_detail = create_random_booking_detail(db)
     new_price = 100.00
     booking_detail_update = BookingDetailUpdate(price=new_price)
-    updated_detail = crud.update_booking_detail(session=db, db_detail=booking_detail, detail_in=booking_detail_update)
+    updated_detail = crud.update_booking_detail(session=db, db_booking_detail=booking_detail, booking_detail_in=booking_detail_update)
     assert updated_detail.price == new_price
 
 

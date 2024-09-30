@@ -15,7 +15,7 @@ OpenAPI.TOKEN = async () => {
 axios.defaults.baseURL = "https://api.themoviedb.org/3";
 axios.defaults.params = {};
 // TODO : REVERT THIS
-axios.defaults.params["api_key"] =  "2be5ab439dc393ba1ff75995066bc1b0";
+axios.defaults.params["api_key"] =  import.meta.env.VITE_API_KEY;
 
 
 const queryClient = new QueryClient()

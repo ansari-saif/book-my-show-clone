@@ -172,9 +172,3 @@ Before continuing, ensure you have the [MJML extension](https://marketplace.visu
 Once you have the MJML extension installed, you can create a new email template in the `src` directory. After creating the new email template and with the `.mjml` file open in your editor, open the command palette with `Ctrl+Shift+P` and search for `MJML: Export to HTML`. This will convert the `.mjml` file to a `.html` file and now you can save it in the build directory.
 
 
-fastapi dev app/main.py
-docker compose exec backend bash scripts/tests-start.sh
-coverage run --source=app -m pytest app/tests/api/routes/test_movies.py::test_create_movie
-
-alembic revision --autogenerate -m "Add column last_name to User model"
-alembic upgrade head

@@ -1,4 +1,4 @@
-# Book My Show Clone
+# BookMyShow Clone
 
 
 ## Technology Stack and Features

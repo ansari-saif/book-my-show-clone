@@ -63,4 +63,3 @@ Frontend docs: [frontend/README.md](./frontend/README.md).
 
 General development docs: [development.md](./development.md).
 
-This includes using Docker Compose, custom local domains, `.env` configurations, etc.

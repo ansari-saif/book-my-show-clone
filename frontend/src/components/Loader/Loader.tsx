@@ -1,7 +1,7 @@
 import React from "react";
 import "./Loader.css";
 
-const Spinner = () => {
+const Spinner: React.FC = () => {
   return (
     <div className="spinner-container">
       <div className="sk-chase">

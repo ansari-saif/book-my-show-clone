@@ -1,7 +1,11 @@
-import React from "react";
 import Slider from "react-slick";
+import React from "react";
 
-const EntertainmentCard = (props) => {
+interface EntertainmentCardProps {
+  src: string;
+}
+
+const EntertainmentCard: React.FC<EntertainmentCardProps> = (props) => {
   return (
     <>
       <div className="w-full h-30 px-2">
@@ -15,8 +19,8 @@ const EntertainmentCard = (props) => {
   );
 };
 
-const EntertainmentCardSlider = () => {
-  const EntertainmentImage = [
+const EntertainmentCardSlider: React.FC = () => {
+  const EntertainmentImage: string[] = [
     "https://assets-in.bmscdn.com/discovery-catalog/collections/tr:w-800,h-800:l-text,ie-MTEwKyBFdmVudHM%3D,co-FFFFFF,ff-Roboto,fs-64,lx-48,ly-320,tg-b,pa-8_0_0_0,l-end:w-300/workshop-and-more-web-collection-202211140440.png",
     "https://assets-in.bmscdn.com/discovery-catalog/collections/tr:w-800,h-800:l-text,ie-MTArIEV2ZW50cw%3D%3D,co-FFFFFF,ff-Roboto,fs-64,lx-48,ly-320,tg-b,pa-8_0_0_0,l-end:w-300/kids-zone-collection-202211140440.png",
     "https://assets-in.bmscdn.com/discovery-catalog/collections/tr:w-800,h-800:l-text,ie-MTkwKyBFdmVudHM%3D,co-FFFFFF,ff-Roboto,fs-64,lx-48,ly-320,tg-b,pa-8_0_0_0,l-end:w-300/comedy-shows-collection-202211140440.png",
@@ -29,7 +33,7 @@ const EntertainmentCardSlider = () => {
   ];
 
   const settings = {
-    infinte: false,
+    infinite: false,
     autoplay: false,
     slidesToShow: 5,
     slidesToScroll: 4,

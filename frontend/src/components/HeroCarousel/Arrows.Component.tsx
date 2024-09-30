@@ -1,6 +1,12 @@
 import React from "react";
 
-export function NextArrow(props) {
+interface ArrowProps {
+  className?: string;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+}
+
+export function NextArrow(props: ArrowProps) {
   return (
     <>
       <div
@@ -12,7 +18,7 @@ export function NextArrow(props) {
   );
 }
 
-export function PrevArrow(props) {
+export function PrevArrow(props: ArrowProps) {
   return (
     <>
       <div

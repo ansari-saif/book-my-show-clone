@@ -1,14 +1,10 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
-// @ts-ignore
 import Loader from "../../../components/Loader/Loader";
 import axios from "axios";
-// @ts-ignore
 import MovieHero from "../../../components/MovieHero/MovieHero.Component";
 import { FaCcApplePay, FaCcVisa } from "react-icons/fa";
 import Slider from "react-slick";
-// @ts-ignore
 import Cast from "../../../components/Cast/Cast.Component";
-// @ts-ignore
 import PosterSlider from "../../../components/PosterSlider/PosterSlider.Component";
 import { useEffect, useState } from "react";
 
@@ -16,13 +12,18 @@ import { useEffect, useState } from "react";
 export const Route = createFileRoute("/_layout/movie/$movieId")({
   component: MovieDetail,
 });
-
+interface CastType {
+  id: string;
+  profile_path: string;
+  original_name: string;
+  character: string;
+}
 function MovieDetail() {
   const { movieId } = useParams({
     from: "/_layout/movie/$movieId",
   });
   const id = movieId;
-  const [cast, setCast] = useState([]);
+  const [cast, setCast] = useState<CastType[]>([]);
   const [similarMovies, setSimilarMovies] = useState([]);
   const [recommendedMovies, setRecommendedMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,12 +37,12 @@ function MovieDetail() {
           castResponse,
           similarResponse,
           recommendedResponse,
-          movieResponse,
+          // movieResponse,
         ] = await Promise.all([
           axios.get(`/movie/${id}/credits`),
           axios.get(`/movie/${id}/similar`),
           axios.get(`/movie/${id}/recommendations`),
-          axios.get(`/movie/${id}`),
+          // axios.get(`/movie/${id}`),
         ]);
 
         setCast(castResponse.data.cast);
@@ -218,13 +219,9 @@ function MovieDetail() {
               <Slider {...settingsCast}>
                 {cast.map((castData) => (
                   <Cast
-                  // @ts-ignore
                     key={castData.id}
-                  // @ts-ignore
                     image={castData.profile_path}
-                  // @ts-ignore
                     castName={castData.original_name}
-                  // @ts-ignore
                     role={castData.character}
                   />
                 ))}
@@ -241,6 +238,7 @@ function MovieDetail() {
                 title="Recommended Movies"
                 posters={recommendedMovies}
                 isDark={false}
+                subtitle="test"
               />
             </div>
 
@@ -255,6 +253,8 @@ function MovieDetail() {
                 title="BMS XCLUSICE"
                 posters={similarMovies}
                 isDark={false}
+                subtitle="test"
+
               />
             </div>
 

@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
-// @ts-ignore
 import HeroCarousel from "../../components/HeroCarousel/HeroCarousel.Component"
-// @ts-ignore
+
 import EntertainmentCardSlider from "../../components/Entertainment/EntertainmentCard.Component";
-// @ts-ignore
 import PosterSlider from "../../components/PosterSlider/PosterSlider.Component";
 import { useEffect, useState } from "react";
 import axios from "axios";

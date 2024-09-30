@@ -2,8 +2,25 @@ import React, { useState } from "react";
 import HeroSlider from "react-slick";
 import { NextArrow, PrevArrow } from "./Arrows.Component";
 
-const HeroCarousel = () => {
-  const [images, setImages] = useState([
+interface ImageData {
+  adult: boolean;
+  backdrop_path: string;
+  genre_ids: number[];
+  id: number;
+  original_language: string;
+  original_title: string;
+  overview: string;
+  popularity: number;
+  poster_path: string;
+  release_date: string;
+  title: string;
+  video: boolean;
+  vote_average: number;
+  vote_count: number;
+}
+
+const HeroCarousel: React.FC = () => {
+  const [images, setImages] = useState<ImageData[]>([
     {
       adult: false,
       backdrop_path: "/jZIYaISP3GBSrVOPfrp98AMa8Ng.jpg",
@@ -79,7 +96,6 @@ const HeroCarousel = () => {
     slidesToShow: 3,
     infinite: true,
     dots: true,
-    // speed: 500,
     slidesToScroll: 1,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
@@ -120,7 +136,6 @@ const HeroCarousel = () => {
     slidesToShow: 3,
     infinite: true,
     dots: true,
-    // speed: 500,
     slidesToScroll: 1,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
@@ -160,10 +175,10 @@ const HeroCarousel = () => {
     <>
       <div className="lg:hidden">
         <HeroSlider {...settings}>
-          {images.map((images, index) => (
+          {images.map((image, index) => (
             <div className="w-full h-56 md:h-80 py-3" key={index}>
               <img
-                src={`https://image.tmdb.org/t/p/original${images.backdrop_path}`}
+                src={`https://image.tmdb.org/t/p/original${image.backdrop_path}`}
                 alt="Hero Banner"
                 className="w-full h-full rounded-md object-cover"
               />
@@ -173,10 +188,10 @@ const HeroCarousel = () => {
       </div>
       <div className="hidden lg:block">
         <HeroSlider {...settingsLG}>
-          {images.map((images, index) => (
+          {images.map((image, index) => (
             <div className="w-full h-96 px-2 py-3" key={index}>
               <img
-                src={`https://image.tmdb.org/t/p/original${images.backdrop_path}`}
+                src={`https://image.tmdb.org/t/p/original${image.backdrop_path}`}
                 alt="Hero Banner"
                 className="w-full h-full rounded-md object-cover"
               />

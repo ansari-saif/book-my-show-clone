@@ -1,12 +1,31 @@
 import React from "react";
-import Slider from "react-slick";
+import Slider, { Settings } from "react-slick";
 import Poster from "../Poster/Poster.Component";
 
-const PosterSlider = (props) => {
-  const { title, subtitle, posters, isDark, config } = props;
+interface PosterType {
+  id: string;
+  title: string;
+  image: string;
+  // Add other relevant fields here
+}
 
-  const settings = {
-    infinte: false,
+interface PosterSliderProps {
+  title: string;
+  subtitle: string;
+  posters: PosterType[];
+  isDark?: boolean;
+  config?: Settings; // Optional: Allows overriding default slider settings
+}
+
+const PosterSlider: React.FC<PosterSliderProps> = ({
+  title,
+  subtitle,
+  posters,
+  isDark = false,
+  config,
+}) => {
+  const defaultSettings: Settings = {
+    infinite: false,
     autoplay: false,
     slidesToShow: 5,
     slidesToScroll: 4,
@@ -39,6 +58,8 @@ const PosterSlider = (props) => {
     ],
   };
 
+  const settings: Settings = config ? { ...defaultSettings, ...config } : defaultSettings;
+
   return (
     <>
       <div className="flex flex-col items-start sm:ml-3 my-2">
@@ -55,6 +76,7 @@ const PosterSlider = (props) => {
       </div>
       <Slider {...settings}>
         {posters.map((each, index) => (
+          // @ts-ignore
           <Poster {...each} isDark={isDark} key={index} />
         ))}
       </Slider>

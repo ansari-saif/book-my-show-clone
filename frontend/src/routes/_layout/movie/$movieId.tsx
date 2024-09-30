@@ -2,7 +2,6 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import Loader from "../../../components/Loader/Loader";
 import axios from "axios";
 import MovieHero from "../../../components/MovieHero/MovieHero.Component";
-import { FaCcApplePay, FaCcVisa } from "react-icons/fa";
 import Slider from "react-slick";
 import Cast from "../../../components/Cast/Cast.Component";
 import PosterSlider from "../../../components/PosterSlider/PosterSlider.Component";

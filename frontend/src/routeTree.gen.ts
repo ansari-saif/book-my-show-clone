@@ -19,6 +19,7 @@ import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
 import { Route as LayoutAdminImport } from './routes/_layout/admin'
 import { Route as LayoutMovieMovieIdImport } from './routes/_layout/movie/$movieId'
+import { Route as LayoutCinemaCinemaIdImport } from './routes/_layout/cinema/$cinemaId'
 
 // Create/Update Routes
 
@@ -62,6 +63,11 @@ const LayoutMovieMovieIdRoute = LayoutMovieMovieIdImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
+const LayoutCinemaCinemaIdRoute = LayoutCinemaCinemaIdImport.update({
+  path: '/cinema/$cinemaId',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -94,6 +100,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/cinema/$cinemaId': {
+      preLoaderRoute: typeof LayoutCinemaCinemaIdImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/movie/$movieId': {
       preLoaderRoute: typeof LayoutMovieMovieIdImport
       parentRoute: typeof LayoutImport
@@ -108,6 +118,7 @@ export const routeTree = rootRoute.addChildren([
     LayoutAdminRoute,
     LayoutSettingsRoute,
     LayoutIndexRoute,
+    LayoutCinemaCinemaIdRoute,
     LayoutMovieMovieIdRoute,
   ]),
   RecoverPasswordRoute,

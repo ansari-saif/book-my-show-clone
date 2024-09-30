@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { AxiosError } from "axios"
@@ -19,7 +18,6 @@ const isLoggedIn = () => {
 
 const useAuth = () => {
   const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate()
   const showToast = useCustomToast()
   const queryClient = useQueryClient()
   const { data: user, isLoading } = useQuery<UserPublic | null, Error>({
@@ -33,7 +31,6 @@ const useAuth = () => {
       UsersService.registerUser({ requestBody: data }),
 
     onSuccess: () => {
-      navigate({ to: "/login" })
       showToast(
         "Account created.",
         "Your account has been created successfully.",
@@ -64,7 +61,6 @@ const useAuth = () => {
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: () => {
-      navigate({ to: "/" })
     },
     onError: (err: ApiError) => {
       let errDetail = (err.body as any)?.detail
@@ -83,7 +79,6 @@ const useAuth = () => {
 
   const logout = () => {
     localStorage.removeItem("access_token")
-    navigate({ to: "/login" })
   }
 
   return {

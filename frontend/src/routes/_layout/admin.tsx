@@ -20,9 +20,7 @@ import { useEffect } from "react"
 import { z } from "zod"
 
 import { type UserPublic, UsersService } from "../../client"
-import AddUser from "../../components/Admin/AddUser"
 import ActionsMenu from "../../components/Common/ActionsMenu"
-import Navbar from "../../components/Common/Navbar"
 
 const usersSearchSchema = z.object({
   page: z.number().catch(1),
@@ -163,7 +161,6 @@ function Admin() {
         Users Management
       </Heading>
 
-      <Navbar type={"User"} addModalAs={AddUser} />
       <UsersTable />
     </Container>
   )

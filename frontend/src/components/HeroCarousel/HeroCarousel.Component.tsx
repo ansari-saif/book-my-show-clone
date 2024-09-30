@@ -20,7 +20,7 @@ interface ImageData {
 }
 
 const HeroCarousel: React.FC = () => {
-  const [images, setImages] = useState<ImageData[]>([
+  const [images, _setImages] = useState<ImageData[]>([
     {
       adult: false,
       backdrop_path: "/jZIYaISP3GBSrVOPfrp98AMa8Ng.jpg",

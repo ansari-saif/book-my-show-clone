@@ -13,16 +13,11 @@
     - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
     - 🎨 [Chakra UI](https://chakra-ui.com) for the frontend components.
     - 🤖 An automatically generated frontend client.
-    - 🧪 [Playwright](https://playwright.dev) for End-to-End testing.
-    - 🦇 Dark mode support.
 - 🐋 [Docker Compose](https://www.docker.com) for development and production.
-- 🔒 Secure password hashing by default.
 - 🔑 JWT (JSON Web Token) authentication.
-- 📫 Email based password recovery.
 - ✅ Tests with [Pytest](https://pytest.org).
 - 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
 - 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
-- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
 
 ## How To Use It
 

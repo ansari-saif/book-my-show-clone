@@ -11,7 +11,7 @@ const MovieHero: React.FC = () => {
         {/* Mobile or tablet screen size */}
         <div className="lg:hidden w-full">
           <img
-            src={`https://image.tmdb.org/t/p/original/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg`}
+            src={`https://assets-in.bmscdn.com/iedb/movies/images/mobile/listing/xxlarge/joker-folie-a-deux-et00352820-1727168074.jpg`}
             alt="Cover Pic"
             className="rounded responsive-img my-2 py-2"
             style={{ width: "calc(100% - 2rem)" }}
@@ -59,7 +59,7 @@ const MovieHero: React.FC = () => {
               </div>
             </div>
             <img
-              src={`https://image.tmdb.org/t/p/original/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg`}
+              src={`https://assets-in.bmscdn.com/iedb/movies/images/mobile/listing/xxlarge/joker-folie-a-deux-et00352820-1727168074.jpg`}
               alt="Backdrop Poster"
               className="w-full h-full object-cover object-center"
             />

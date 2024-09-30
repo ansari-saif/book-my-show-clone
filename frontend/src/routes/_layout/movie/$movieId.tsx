@@ -163,48 +163,7 @@ function MovieDetail() {
               <h1 className="text-gray-800 font-bold text-2xl">
                 About the movie
               </h1>
-              <p>test</p>
-            </div>
-
-            <div className="my-8">
-              <hr />
-            </div>
-
-            <div className="my-8">
-              <h2 className="text-gray-800 font-bold text-2xl mb-3">
-                Applicable Offers
-              </h2>
-              <div className="flex flex-col gap-3 lg:flex-row">
-                <div className="flex items-start gap-2 bg-yellow-100 p-3 border-yellow-400 border-dashed border-2 rounded-md">
-                  <div className="w-8 h-8">
-                    <FaCcVisa className="w-full h-full" />
-                  </div>
-                  <div className="flex flex-col items-start">
-                    <h3 className="text-gray-700 text-xl font-bold">
-                      Visa Stream Offer
-                    </h3>
-                    <p className="text-gray-600">
-                      Get 50% off up to INR 150 on all RuPay card* on BookMyShow
-                      Stream.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2 bg-yellow-100 p-3 border-yellow-400 border-dashed border-2 rounded-md">
-                  <div className="w-8 h-8">
-                    <FaCcApplePay className="w-full h-full" />
-                  </div>
-                  <div className="flex flex-col items-start">
-                    <h3 className="text-gray-700 text-xl font-bold">
-                      Film Pass
-                    </h3>
-                    <p className="text-gray-600">
-                      Get 50% off up to INR 150 on all RuPay card* on BookMyShow
-                      Stream.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <p>The film`s backdrop is centered around the far and forgotten coastal lands of India.The people,or rather the villains,in the film neither fear death nor god and there is no sense of humanity among them. Devara changes this scenario in his inimitable style.</p>
             </div>
 
             <div className="my-8">

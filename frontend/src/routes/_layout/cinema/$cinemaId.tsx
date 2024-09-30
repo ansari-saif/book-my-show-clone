@@ -17,7 +17,7 @@ function MovieDetail() {
         <Loader />
       ) : (
         <>
-          <div className="font-roboto antialiased text-base font-normal bg-transparent relative m-0 p-0 border-0">
+          <div aria-label={cinemaId} className="font-roboto antialiased text-base font-normal bg-transparent relative m-0 p-0 border-0">
             <nav
               id="navbar"
               className="navbar _absolute block m-0 p-0 border-0 text-base font-normal bg-transparent"

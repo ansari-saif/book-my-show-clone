@@ -14,8 +14,7 @@
 - 🐋 [Docker Compose](https://www.docker.com) for development and production.
 - 🔑 JWT (JSON Web Token) authentication.
 - ✅ Tests with [Pytest](https://pytest.org).
-- 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
-- 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
+
 
 ## How To Use It
 
@@ -79,10 +78,6 @@ Backend docs: [backend/README.md](./backend/README.md).
 ## Frontend Development
 
 Frontend docs: [frontend/README.md](./frontend/README.md).
-
-## Deployment
-
-Deployment docs: [deployment.md](./deployment.md).
 
 ## Development
 
